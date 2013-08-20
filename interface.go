@@ -1,3 +1,4 @@
+// In-memory non-relational transaction-based snapshot-based database
 package gobdb
 
 import (
