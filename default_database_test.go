@@ -7,7 +7,8 @@ import (
 
 func TestDefaultDatabaseInterface(t *testing.T) {
 
-	var i interface{} = NewDefaultDatabase(nil, nil)
+	var i interface{}
+	i, _ = NewDefaultDatabase(nil, nil, nil)
 	if _, ok := i.(Database); !ok {
 		t.Error(i)
 	}
@@ -18,9 +19,12 @@ func TestDefaultDatabaseInterface(t *testing.T) {
 
 func TestDefaultDatabaseEmpty(t *testing.T) {
 
-	database := NewDefaultDatabase(&testRoot{}, nil)
+	database, err := NewDefaultDatabase(&testRoot{}, nil, nil)
 	if database == nil {
 		t.Fatal(database)
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	result := database.Read(&testReader{})
@@ -33,9 +37,12 @@ func TestDefaultDatabaseEmpty(t *testing.T) {
 
 func TestDefaultDatabaseWrite(t *testing.T) {
 
-	database := NewDefaultDatabase(&testRoot{}, nil)
+	database, err := NewDefaultDatabase(&testRoot{}, nil, nil)
 	if database == nil {
 		t.Fatal(database)
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	result, err := database.Write(&testWriter{3})
@@ -70,9 +77,13 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 
 	repository := NewMemBurstRepository()
 	dispatcher := NewDefaultBurstDispatcher(repository)
-	database := NewDefaultDatabase(&testRoot{}, dispatcher)
+	defer dispatcher.Close()
+	database, err := NewDefaultDatabase(&testRoot{}, nil, dispatcher)
 	if database == nil {
 		t.Fatal(database)
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	result, err := database.Write(&testWriter{11})
@@ -114,6 +125,7 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	defer burst.Close()
 
 	transaction, err := burst.Read()
 	if err != nil {
@@ -138,6 +150,79 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 		t.Error(transaction.Id)
 	}
 	tw, ok = transaction.Writer.(*testWriter)
+	if !ok {
+		t.Fatalf("%#v", transaction.Writer)
+	}
+	if tw.Increment != 12 {
+		t.Error(tw.Increment)
+	}
+
+	if _, err := burst.Read(); err != io.EOF {
+		t.Error(err)
+	}
+}
+
+func TestDefaultDatabaseWithSnapshotReader(t *testing.T) {
+
+	snapshots := NewMemSnapshotRepository()
+
+	wsnapshot, err := snapshots.WriteSnapshot(1)
+	if err != nil {
+		t.Error(err)
+	}
+	defer wsnapshot.Close()
+
+	if err := wsnapshot.Write(&testWriter{11}); err != nil {
+		t.Error(err)
+	}
+
+	if err := wsnapshot.Close(); err != nil {
+		t.Error(err)
+	}
+
+	bursts := NewMemBurstRepository()
+	dispatcher := NewDefaultBurstDispatcher(bursts)
+	defer dispatcher.Close()
+	database, err := NewDefaultDatabase(&testRoot{}, snapshots, dispatcher)
+	if database == nil {
+		t.Fatal(database)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := database.Write(&testWriter{12})
+	if value, ok := result.(int); !ok {
+		t.Error(result)
+	} else if value != 23 {
+		t.Error(value)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := dispatcher.Close(); err != nil {
+		t.Error(err)
+	}
+
+	rbursts := bursts.Bursts()
+	if len(rbursts) != 1 {
+		t.Fatal(rbursts)
+	}
+	burst, err := bursts.ReadBurst(rbursts[0])
+	if err != nil {
+		t.Error(err)
+	}
+	defer burst.Close()
+
+	transaction, err := burst.Read()
+	if err != nil {
+		t.Error(err)
+	}
+	if transaction.Id != 2 {
+		t.Error(transaction.Id)
+	}
+	tw, ok := transaction.Writer.(*testWriter)
 	if !ok {
 		t.Fatalf("%#v", transaction.Writer)
 	}
