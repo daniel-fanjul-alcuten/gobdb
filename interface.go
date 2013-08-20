@@ -84,3 +84,9 @@ type Repository interface {
 	// Get an io.WriteCloser of a Snapshot.
 	WriteSnapshot(TransactionId) (SnapshotWriter, error)
 }
+
+// A controller of a Root object that keep it synced with a Repository.
+type Database interface {
+	Read(Reader) interface{}
+	Write(Writer) interface{}
+}
