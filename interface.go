@@ -69,24 +69,49 @@ type SnapshotWriter struct {
 	io.WriteCloser
 }
 
-// A container of Bursts and Snapshots.
-type Repository interface {
+// A container that can read Bursts and Snapshots.
+type ReadRepository interface {
 	// List of all Bursts.
 	Bursts() []BurstId
 	// Get an io.ReadCloser of a Burst.
 	ReadBurst(BurstId) (BurstReader, error)
-	// Get an io.WriteCloser of a Burst.
-	WriteBurst(TransactionId) (BurstWriter, error)
 	// List of all Snapshots.
 	Snapshots() []SnapshotId
 	// Get an io.ReadCloser of a Snapshot.
 	ReadSnapshot(SnapshotId) (SnapshotReader, error)
+}
+
+// A container that can write Bursts and Snapshots.
+type WriteRepository interface {
+	// Get an io.WriteCloser of a Burst.
+	WriteBurst(TransactionId) (BurstWriter, error)
 	// Get an io.WriteCloser of a Snapshot.
 	WriteSnapshot(TransactionId) (SnapshotWriter, error)
 }
 
-// A controller of a Root object that keep it synced with a Repository.
+// A controller of one instance of a Root object.
+// On startup, it accesses a ReadRepository, reads a Snapshot and some Bursts
+// and applies the Writers to the Root object.
 type Database interface {
+	// It applies the Reader to the Root object and returns its result.
 	Read(Reader) interface{}
-	Write(Writer) interface{}
+}
+
+// It dispatches the writes of Writers to one or more Bursts of a
+// WriteRepository. It implements the rotation of Bursts.
+type BurstDispatcher interface {
+	// It creates a Burst or reuses a previous one and writes the Writer into it.
+	// It may close and create a new Burst when some threshold is reached based
+	// on criteria like time, number of bytes, number of Writers and so on.
+	Write(Writer) error
+}
+
+// A database that can update the Root object.
+// On every Write(), it updates the Root object and then writes the Writer into
+// a BurstDispatcher.
+type WriteDatabase interface {
+	Database
+	// It applies the Writer to the Root object and returns its result. It writes
+	// the Writer to the BurstDispatcher.
+	Write(Writer) (interface{}, error)
 }
