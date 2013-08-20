@@ -1,11 +1,6 @@
-// In-memory non-relational transaction-based snapshot-based database
 package gobdb
 
-import (
-	"io"
-)
-
-// The type of objects that will be held in memory.
+// The object that will be kept in memory.
 type Root interface{}
 
 // An operation that will read some data from a Root.
@@ -23,6 +18,7 @@ type Writer interface {
 }
 
 // It defines the order in which the Writers must be reapplied.
+// The sequence starts from 1 and the zero value is considered like a nil.
 type TransactionId uint64
 
 // The Writers must be reapplied in order.
@@ -33,72 +29,85 @@ type Transaction struct {
 
 // A Burst is a gob stream of Transactions.
 // It is required to contain them in order, but not to be consecutive.
-type BurstId struct {
-	// The first TransactionId of the stream.
-	First TransactionId
-	// The last TransactionId of the stream.
-	Last TransactionId
+type BurstId interface {
+	First() TransactionId
+	Last() TransactionId
 }
 
-// An io.ReadCloser of a Burst.
-type BurstReader struct {
-	Id BurstId
-	io.ReadCloser
+// It reads the Transactions of a Burst.
+type BurstReader interface {
+	Id() BurstId
+	Read() (Transaction, error)
+	Close() error
 }
 
-// An io.WriteCloser of a Burst.
-type BurstWriter struct {
-	First TransactionId
-	io.WriteCloser
+// A container that can read Bursts.
+type BurstRepository interface {
+	// List of all Bursts.
+	Bursts() []BurstId
+	// Get a BurstReader of a Burst.
+	ReadBurst(BurstId) (BurstReader, error)
+}
+
+// It writes the Transactions of a Burst.
+type BurstWriter interface {
+	First() TransactionId
+	Last() TransactionId
+	Write(Transaction) error
+	Close() error
+}
+
+// A container that can write Bursts.
+type WriteBurstRepository interface {
+	// Get a BurstWriter of a Burst.
+	WriteBurst() (BurstWriter, error)
 }
 
 // A Snapshot is a gob stream of Writers. To apply these Writers in sequence
 // must yield the same result than to apply the Writers of all Transactions
-// starting from the first one until the give one.
+// starting from the first one until the given one.
 type SnapshotId TransactionId
 
-// An io.ReadCloser of a Snapshot.
-type SnapshotReader struct {
-	Id SnapshotId
-	io.ReadCloser
+// It reads the Writers of a Snapshot.
+type SnapshotReader interface {
+	Id() SnapshotId
+	Read() (Writer, error)
+	Close() error
 }
 
-// An io.WriteCloser of a Snapshot.
-type SnapshotWriter struct {
-	Id SnapshotId
-	io.WriteCloser
-}
-
-// A container that can read Bursts and Snapshots.
-type ReadRepository interface {
-	// List of all Bursts.
-	Bursts() []BurstId
-	// Get an io.ReadCloser of a Burst.
-	ReadBurst(BurstId) (BurstReader, error)
+// A container that can read Snapshots.
+type SnapshotRepository interface {
 	// List of all Snapshots.
 	Snapshots() []SnapshotId
-	// Get an io.ReadCloser of a Snapshot.
+	// Get a SnapshotReader of a Snapshot.
 	ReadSnapshot(SnapshotId) (SnapshotReader, error)
 }
 
-// A container that can write Bursts and Snapshots.
-type WriteRepository interface {
-	// Get an io.WriteCloser of a Burst.
-	WriteBurst(TransactionId) (BurstWriter, error)
-	// Get an io.WriteCloser of a Snapshot.
+// It writes the Writers of a Snapshot.
+type SnapshotWriter interface {
+	Id() SnapshotId
+	Write(Writer) error
+	Close() error
+}
+
+// A container that can write Snapshots.
+type WriteSnapshotRepository interface {
+	// Get a SnapshotWriter of a Snapshot.
 	WriteSnapshot(TransactionId) (SnapshotWriter, error)
 }
 
 // A controller of one instance of a Root object.
-// On startup, it accesses a ReadRepository, reads a Snapshot and some Bursts
-// and applies the Writers to the Root object.
+// On startup, it may access a SnapshotRepository, read a Snapshot and apply
+// the Writers to the Root object.
+// Then, it may access a BurstRepository, read some Bursts and apply the
+// Writers to the Root object.
 type Database interface {
 	// It applies the Reader to the Root object and returns its result.
 	Read(Reader) interface{}
 }
 
 // It dispatches the writes of Writers to one or more Bursts of a
-// WriteRepository. It implements the rotation of Bursts.
+// WriteBurstRepository. It implements the rotation of Bursts.
 type BurstDispatcher interface {
 	// It creates a Burst or reuses a previous one and writes the Writer into it.
 	// It may close and create a new Burst when some threshold is reached based
@@ -114,4 +123,22 @@ type WriteDatabase interface {
 	// It applies the Writer to the Root object and returns its result. It writes
 	// the Writer to the BurstDispatcher.
 	Write(Writer) (interface{}, error)
+}
+
+// A Root that can take snapshots
+type SnapshotRoot interface {
+	Root
+	// It invokes the function as many times as needed with the sequence of
+	// Writers that are enough to recover the same state of the Root.
+	// It the given function returns an errors, it must be returned as soon as
+	// possible.
+	Snapshot(func(...Writer) error) error
+}
+
+// A database that can take snapshots of the SnapshotRoot object.
+type SnapshotDatabase interface {
+	Database
+	// It invokes Root.Snapshot() and writes all its Writers into the
+	// WriteSnapshotRepository.
+	Snapshot(WriteSnapshotRepository) error
 }
