@@ -10,7 +10,7 @@ func ExampleMemBurstRepository() {
 	bursts := NewMemBurstRepository()
 	dispatcher := NewDefaultBurstDispatcher(bursts)
 	defer dispatcher.Close()
-	database, _ := NewDefaultDatabase(&testRoot{}, nil, dispatcher)
+	database := NewDefaultDatabase(&testRoot{}, 0, dispatcher)
 
 	// the testWriter increments the counter
 	result1, _ := database.Write(&testWriter{3})

@@ -7,18 +7,10 @@ type DefaultDatabase struct {
 	dispatcher BurstDispatcher
 }
 
-// New instance. The SnapshotId and the BurstDispatcher are optional.
-func NewDefaultDatabase(root Root, snapshotId SnapshotId, dispatcher BurstDispatcher) (db *DefaultDatabase, err error) {
-	var id TransactionId
-	if snapshotId != nil {
-		err = ApplySnapshot(root, snapshotId)
-		if err != nil {
-			return
-		}
-		id = snapshotId.Id()
-	}
-	db = &DefaultDatabase{root, id, dispatcher}
-	return
+// New instance. The TransactionId is the last one that has been applied to the
+// Root. The BurstDispatcher is optional.
+func NewDefaultDatabase(root Root, lastId TransactionId, dispatcher BurstDispatcher) *DefaultDatabase {
+	return &DefaultDatabase{root, lastId, dispatcher}
 }
 
 // Implements Database.Read().
