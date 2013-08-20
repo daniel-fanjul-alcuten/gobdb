@@ -14,7 +14,7 @@ type Reader interface {
 // It must be deterministic.
 // It must be gob encodable.
 type Writer interface {
-	Write(Root) interface{}
+	Write(Root) (interface{}, error)
 }
 
 // It defines the order in which the Writers must be reapplied.

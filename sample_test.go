@@ -20,10 +20,10 @@ type testWriter struct {
 	Increment int
 }
 
-func (op *testWriter) Write(root Root) interface{} {
+func (op *testWriter) Write(root Root) (interface{}, error) {
 	r := root.(*testRoot)
 	r.counter += op.Increment
-	return r.counter
+	return r.counter, nil
 }
 
 func init() {
