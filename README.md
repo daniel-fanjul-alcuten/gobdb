@@ -21,3 +21,10 @@ That will have these others in the future:
 * On startup, all operations in the log files will be reapplied in the same order.
 * It is responsibility of the user to make the operations deterministic.
 * The log files can be compacted in snapshots in the same or different processes.
+
+Installation
+============
+
+<pre>
+go get github.com/daniel-fanjul-alcuten/gobdb
+</pre>
