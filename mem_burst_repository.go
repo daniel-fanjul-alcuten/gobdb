@@ -66,6 +66,7 @@ func (r *MemBurstRepository) WriteBurst() (BurstWriter, error) {
 
 type memBurstId struct {
 	first, last TransactionId
+	repository  *MemBurstRepository
 }
 
 func (id *memBurstId) First() TransactionId {
@@ -74,6 +75,10 @@ func (id *memBurstId) First() TransactionId {
 
 func (id *memBurstId) Last() TransactionId {
 	return id.last
+}
+
+func (id *memBurstId) Repository() BurstRepository {
+	return id.repository
 }
 
 type memBurstReader struct {
@@ -147,7 +152,7 @@ func (bw *memBurstWriter) Close() error {
 		m3 = make(map[*memBurstId][]byte)
 		m2[bw.last] = m3
 	}
-	mid := &memBurstId{bw.first, bw.last}
+	mid := &memBurstId{bw.first, bw.last, bw.repository}
 	m3[mid] = bw.buffer.Bytes()
 	bw.buffer = nil
 	bw.encoder = nil

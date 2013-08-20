@@ -80,6 +80,9 @@ func TestMemBurstRepositoryBursts(t *testing.T) {
 		t.Error(bursts)
 	} else {
 		id = bursts[0]
+		if bursts[0].Repository() != repository {
+			t.Error(bursts[0].Repository())
+		}
 	}
 
 	rburst, err := repository.ReadBurst(id)

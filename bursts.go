@@ -5,6 +5,7 @@ package gobdb
 type BurstId interface {
 	First() TransactionId
 	Last() TransactionId
+	Repository() BurstRepository
 }
 
 // It reads the Transactions of a Burst.
