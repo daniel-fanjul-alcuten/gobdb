@@ -2,7 +2,7 @@ package gobdb
 
 // A controller of one instance of a Root object.
 // On startup, it may read a Snapshot and apply the Writers to the Root object.
-// Then, it may read some Bursts and apply the Writers to the Root object.
+// Then, it may read some Bursts and apply the Transactions.
 type Database interface {
 	// It applies the Reader to the Root object and returns its result.
 	Read(Reader) interface{}

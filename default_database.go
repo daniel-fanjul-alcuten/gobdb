@@ -1,6 +1,6 @@
 package gobdb
 
-// A Database that does not use any Repository.
+// A Database, WriteDatabase and SnapshotDatabase.
 type DefaultDatabase struct {
 	root       Root
 	lastId     TransactionId
