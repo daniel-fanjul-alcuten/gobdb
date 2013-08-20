@@ -109,10 +109,13 @@ type Database interface {
 // It dispatches the writes of Writers to one or more Bursts of a
 // WriteBurstRepository. It implements the rotation of Bursts.
 type BurstDispatcher interface {
-	// It creates a Burst or reuses a previous one and writes the Writer into it.
-	// It may close and create a new Burst when some threshold is reached based
-	// on criteria like time, number of bytes, number of Writers and so on.
-	Write(Writer) error
+	// It creates a Burst or reuses a previous one and writes the Transaction
+	// to it.
+	// It may close and create new Bursts when some threshold is reached based
+	// on criteria like time, number of bytes, number of Transactions and so on.
+	Write(Transaction) error
+	// Close the last BurstWriter if needed.
+	Close() error
 }
 
 // A database that can update the Root object.
