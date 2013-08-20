@@ -30,20 +30,16 @@ type WriteDatabase interface {
 	Write(Writer) (interface{}, error)
 }
 
-// A Root that can take snapshots
-type SnapshotRoot interface {
-	Root
-	// It invokes the function as many times as needed with the sequence of
-	// Writers that are enough to recover the same state of the Root.
-	// It the given function returns an errors, it must be returned as soon as
-	// possible.
-	Snapshot(func(...Writer) error) error
-}
+// The user defined function to take a Snapshot of a Root.
+// It invokes the given function as many times as needed with the sequence of
+// Writers that are enough to recover the same state of the Root.
+// It the given function returns an errors, it must be returned immediately.
+type Snapshooter func(Root, func(...Writer) error) error
 
 // A database that can take snapshots of the SnapshotRoot object.
 type SnapshotDatabase interface {
 	Database
 	// It invokes Root.Snapshot() and writes all its Writers into the
 	// WriteSnapshotRepository.
-	Snapshot(WriteSnapshotRepository) error
+	TakeSnapshot(Snapshooter, WriteSnapshotRepository) error
 }

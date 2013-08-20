@@ -1,9 +1,48 @@
 package gobdb
 
 import (
+	"fmt"
 	"io"
 	"testing"
 )
+
+func ExampleDefaultDatabase() {
+
+	bursts := NewMemBurstRepository()
+	dispatcher := NewDefaultBurstDispatcher(bursts)
+	snapshots := NewMemSnapshotRepository()
+	{
+		// the testRoot object keeps a counter
+		database := NewDefaultDatabase(&testRoot{0}, 0, dispatcher)
+
+		// the testWriter increments the counter
+		result1, _ := database.Write(&testWriter{3})
+		fmt.Println("first write:", result1)
+
+		// testSnapshooter is a Snapshooter for the type testRoot
+		_ = database.TakeSnapshot(testSnapshooter, snapshots)
+
+		// the testWriter decrements the counter
+		result2, _ := database.Write(&testWriter{-1})
+		fmt.Println("second write:", result2)
+
+		_ = dispatcher.Close()
+	}
+
+	snapshotId := snapshots.Snapshots()[0]
+	{
+		root := &testRoot{0}
+		_ = ApplySnapshot(root, snapshotId)
+		database := NewDefaultDatabase(root, snapshotId.Id(), nil)
+
+		// the testReader reads the counter
+		result := database.Read(&testReader{})
+		fmt.Println("after snapshot:", result)
+	}
+	// Output: first write: 3
+	// second write: 2
+	// after snapshot: 3
+}
 
 func TestDefaultDatabaseInterface(t *testing.T) {
 
@@ -13,6 +52,9 @@ func TestDefaultDatabaseInterface(t *testing.T) {
 		t.Error(i)
 	}
 	if _, ok := i.(WriteDatabase); !ok {
+		t.Error(i)
+	}
+	if _, ok := i.(SnapshotDatabase); !ok {
 		t.Error(i)
 	}
 }
@@ -149,6 +191,71 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 	}
 
 	if _, err := burst.Read(); err != io.EOF {
+		t.Error(err)
+	}
+}
+
+func TestDefaultDatabaseTakeSnapshot(t *testing.T) {
+
+	database := NewDefaultDatabase(&testRoot{}, 0, nil)
+	if database == nil {
+		t.Fatal(database)
+	}
+
+	result, err := database.Write(&testWriter{11})
+	if value, ok := result.(int); !ok {
+		t.Error(result)
+	} else if value != 11 {
+		t.Error(value)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err = database.Write(&testWriter{12})
+	if value, ok := result.(int); !ok {
+		t.Error(result)
+	} else if value != 23 {
+		t.Error(value)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+
+	repository := NewMemSnapshotRepository()
+	if err := database.TakeSnapshot(testSnapshooter, repository); err != nil {
+		t.Error(err)
+	}
+
+	var id SnapshotId
+	if snapshots := repository.Snapshots(); len(snapshots) != 1 {
+		t.Error(snapshots)
+	} else {
+		id = snapshots[0]
+		if id.Id() != 2 {
+			t.Error(id.Id())
+		}
+	}
+
+	snapshot, err := repository.ReadSnapshot(id)
+	if err != nil {
+		t.Error(err)
+	}
+	defer snapshot.Close()
+
+	writer, err := snapshot.Read()
+	if err != nil {
+		t.Error(err)
+	}
+	tw, ok := writer.(*testWriter)
+	if !ok {
+		t.Fatalf("%#v", writer)
+	}
+	if tw.Increment != 23 {
+		t.Error(tw.Increment)
+	}
+
+	if _, err := snapshot.Read(); err != io.EOF {
 		t.Error(err)
 	}
 }

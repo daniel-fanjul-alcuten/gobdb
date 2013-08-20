@@ -24,9 +24,28 @@ func (db *DefaultDatabase) Write(writer Writer) (value interface{}, err error) {
 	if err != nil {
 		return
 	}
+	db.lastId++
 	if db.dispatcher != nil {
-		db.lastId++
 		err = db.dispatcher.Write(Transaction{db.lastId, writer})
 	}
 	return
+}
+
+// Implements SnapshotDatabase.TakeSnapshot().
+func (db *DefaultDatabase) TakeSnapshot(snapshooter Snapshooter, repository WriteSnapshotRepository) error {
+
+	writer, err := repository.WriteSnapshot(db.lastId)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+
+	return snapshooter(db.root, func(writers ...Writer) error {
+		for _, w := range writers {
+			if err := writer.Write(w); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

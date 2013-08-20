@@ -26,6 +26,11 @@ func (op *testWriter) Write(root Root) (interface{}, error) {
 	return r.counter, nil
 }
 
+func testSnapshooter(root Root, write func(...Writer) error) error {
+	r := root.(*testRoot)
+	return write(&testWriter{r.counter})
+}
+
 func init() {
 	gob.Register(&testWriter{})
 }

@@ -1,9 +1,39 @@
 package gobdb
 
 import (
+	"fmt"
 	"io"
 	"testing"
 )
+
+func ExampleMemSnapshotRepository() {
+
+	snapshots := NewMemSnapshotRepository()
+	{
+		// the testRoot object keeps a counter
+		database := NewDefaultDatabase(&testRoot{0}, 0, nil)
+
+		// the testWriter increments the counter
+		result, _ := database.Write(&testWriter{3})
+		fmt.Println("before snapshot:", result)
+
+		// testSnapshooter is a Snapshooter for the type testRoot
+		_ = database.TakeSnapshot(testSnapshooter, snapshots)
+	}
+
+	{
+		snapshot := snapshots.Snapshots()[0]
+		root := &testRoot{0}
+		_ = ApplySnapshot(root, snapshot)
+		database := NewDefaultDatabase(root, snapshot.Id(), nil)
+
+		// the testReader reads the counter
+		result := database.Read(&testReader{})
+		fmt.Println("after snapshot:", result)
+	}
+	// Output: before snapshot: 3
+	// after snapshot: 3
+}
 
 func TestMemSnapshotRepositoryInterface(t *testing.T) {
 
