@@ -3,7 +3,9 @@ package gobdb
 // A Snapshot is a gob stream of Writers. To apply these Writers in sequence
 // must yield the same result than to apply the Writers of all Transactions
 // starting from the first one until the given one.
-type SnapshotId TransactionId
+type SnapshotId interface {
+	Id() TransactionId
+}
 
 // It reads the Writers of a Snapshot.
 type SnapshotReader interface {
@@ -22,7 +24,7 @@ type SnapshotRepository interface {
 
 // It writes the Writers of a Snapshot.
 type SnapshotWriter interface {
-	Id() SnapshotId
+	Id() TransactionId
 	Write(Writer) error
 	Close() error
 }
