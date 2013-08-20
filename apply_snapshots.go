@@ -3,22 +3,7 @@ package gobdb
 import (
 	"errors"
 	"io"
-	"sort"
 )
-
-type SnapshotIdSlice []SnapshotId
-
-func (s SnapshotIdSlice) Len() int {
-	return len(s)
-}
-
-func (s SnapshotIdSlice) Less(i, j int) bool {
-	return s[i].Id() < s[j].Id()
-}
-
-func (s SnapshotIdSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
 
 // It selects the best snapshot and applies the Writers to the Root.
 func ApplySnapshot(root Root, repository SnapshotRepository) (id TransactionId, err error) {
@@ -28,8 +13,8 @@ func ApplySnapshot(root Root, repository SnapshotRepository) (id TransactionId, 
 		return
 	}
 
-	sort.Sort(SnapshotIdSlice(snapshots))
-	snapshotId := snapshots[len(snapshots)-1]
+	SortSnapshots(snapshots)
+	snapshotId := snapshots[0]
 	id = snapshotId.Id()
 
 	var reader SnapshotReader
