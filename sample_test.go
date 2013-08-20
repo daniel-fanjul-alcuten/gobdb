@@ -11,16 +11,19 @@ type testRoot struct {
 type testReader struct {
 }
 
-func (r *testReader) Read(Root) interface{} {
-	return nil
+func (op *testReader) Read(root Root) interface{} {
+	r := root.(*testRoot)
+	return r.counter
 }
 
 type testWriter struct {
 	Increment int
 }
 
-func (w *testWriter) Write(Root) interface{} {
-	return nil
+func (op *testWriter) Write(root Root) interface{} {
+	r := root.(*testRoot)
+	r.counter += op.Increment
+	return r.counter
 }
 
 func init() {
