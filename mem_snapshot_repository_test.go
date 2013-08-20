@@ -61,6 +61,9 @@ func TestMemSnapshotRepositorySnapshots(t *testing.T) {
 		t.Error(snapshots)
 	} else {
 		id = snapshots[0]
+		if snapshots[0].Repository() != repository {
+			t.Error(snapshots[0].Repository())
+		}
 	}
 
 	rsnapshot, err := repository.ReadSnapshot(id)

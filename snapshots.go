@@ -5,6 +5,7 @@ package gobdb
 // starting from the first one until the given one.
 type SnapshotId interface {
 	Id() TransactionId
+	Repository() SnapshotRepository
 }
 
 // It reads the Writers of a Snapshot.

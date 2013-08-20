@@ -60,11 +60,16 @@ func (r *MemSnapshotRepository) WriteSnapshot(id TransactionId) (SnapshotWriter,
 }
 
 type memSnapshotId struct {
-	id TransactionId
+	id         TransactionId
+	repository *MemSnapshotRepository
 }
 
 func (id *memSnapshotId) Id() TransactionId {
 	return id.id
+}
+
+func (id *memSnapshotId) Repository() SnapshotRepository {
+	return id.repository
 }
 
 type memSnapshotReader struct {
@@ -116,7 +121,7 @@ func (bw *memSnapshotWriter) Close() error {
 		m2 = make(map[*memSnapshotId][]byte)
 		bw.repository.snaps[bw.id] = m2
 	}
-	mid := &memSnapshotId{bw.id}
+	mid := &memSnapshotId{bw.id, bw.repository}
 	m2[mid] = bw.buffer.Bytes()
 	bw.buffer = nil
 	bw.encoder = nil
