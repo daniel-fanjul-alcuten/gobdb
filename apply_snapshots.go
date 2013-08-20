@@ -5,41 +5,28 @@ import (
 	"io"
 )
 
-// It selects the best snapshot and applies the Writers to the Root.
-func ApplySnapshot(root Root, repository SnapshotRepository) (id TransactionId, err error) {
+// It applies the Writers of a Snapshot to a Root.
+func ApplySnapshot(root Root, snapshotId SnapshotId) error {
 
-	snapshots := repository.Snapshots()
-	if len(snapshots) == 0 {
-		return
-	}
-
-	SortSnapshots(snapshots)
-	snapshotId := snapshots[0]
-	id = snapshotId.Id()
-
-	var reader SnapshotReader
-	reader, err = repository.ReadSnapshot(snapshotId)
+	reader, err := snapshotId.Repository().ReadSnapshot(snapshotId)
 	if err != nil {
-		return
+		return err
 	}
 	defer reader.Close()
 
 	for {
-		var writer Writer
-		writer, err = reader.Read()
+		writer, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				err = nil
 			}
-			return
+			return err
 		}
 		if writer == nil {
-			err = errors.New("gobdb: decoded nil Writer on ApplySnapshot")
-			return
+			return errors.New("gobdb: decoded nil Writer on ApplySnapshot")
 		}
-		_, err = writer.Write(root)
-		if err != nil {
-			return
+		if _, err := writer.Write(root); err != nil {
+			return err
 		}
 	}
 }

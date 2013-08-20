@@ -7,14 +7,15 @@ type DefaultDatabase struct {
 	dispatcher BurstDispatcher
 }
 
-// New instance. The SnapshotRepository and the BurstDispatcher are optional.
-func NewDefaultDatabase(root Root, snapshots SnapshotRepository, dispatcher BurstDispatcher) (db *DefaultDatabase, err error) {
+// New instance. The SnapshotId and the BurstDispatcher are optional.
+func NewDefaultDatabase(root Root, snapshotId SnapshotId, dispatcher BurstDispatcher) (db *DefaultDatabase, err error) {
 	var id TransactionId
-	if snapshots != nil {
-		id, err = ApplySnapshot(root, snapshots)
+	if snapshotId != nil {
+		err = ApplySnapshot(root, snapshotId)
 		if err != nil {
 			return
 		}
+		id = snapshotId.Id()
 	}
 	db = &DefaultDatabase{root, id, dispatcher}
 	return

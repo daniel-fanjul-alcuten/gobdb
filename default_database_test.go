@@ -180,10 +180,11 @@ func TestDefaultDatabaseWithSnapshotReader(t *testing.T) {
 		t.Error(err)
 	}
 
+	snapshotId := snapshots.Snapshots()[0]
 	bursts := NewMemBurstRepository()
 	dispatcher := NewDefaultBurstDispatcher(bursts)
 	defer dispatcher.Close()
-	database, err := NewDefaultDatabase(&testRoot{}, snapshots, dispatcher)
+	database, err := NewDefaultDatabase(&testRoot{}, snapshotId, dispatcher)
 	if database == nil {
 		t.Fatal(database)
 	}
