@@ -10,27 +10,32 @@ func ExampleMemBurstRepository() {
 
 	// the testRoot object keeps a counter
 	bursts := NewMemBurstRepository()
-	dispatcher := NewDefaultBurstDispatcher(bursts)
-	database := NewDefaultDatabase(&testRoot{0}, 0, dispatcher)
+	{
+		dispatcher := NewDefaultBurstDispatcher(bursts)
+		database := NewDefaultDatabase(&testRoot{0}, 0, dispatcher)
 
-	// the testWriter increments the counter
-	result1, _ := database.Write(&testWriter{3})
-	fmt.Println("first write:", result1)
+		// the testWriter increments the counter
+		_, _ = database.Write(&testWriter{3})
+		// the testWriter decrements the counter
+		_, _ = database.Write(&testWriter{-1})
+		// the testReader reads the counter
+		result := database.Read(&testReader{})
+		fmt.Println("before burst:", result)
 
-	// the testWriter decrements the counter
-	result2, _ := database.Write(&testWriter{-1})
-	fmt.Println("second write:", result2)
+		_ = dispatcher.Close()
+	}
 
-	// the testReader reads the counter
-	result3 := database.Read(&testReader{})
-	fmt.Println("read:", result3)
+	{
+		root := &testRoot{0}
+		id, _ := ApplyBursts(root, 0, bursts.Bursts())
+		database := NewDefaultDatabase(root, id, nil)
 
-	_ = dispatcher.Close()
-	fmt.Println("bursts:", len(bursts.Bursts()))
-	// Output: first write: 3
-	// second write: 2
-	// read: 2
-	// bursts: 1
+		// the testReader reads the counter
+		result := database.Read(&testReader{})
+		fmt.Println("after burst:", result)
+	}
+	// Output: before burst: 2
+	// after burst: 2
 }
 
 func TestMemBurstRepositoryInterface(t *testing.T) {

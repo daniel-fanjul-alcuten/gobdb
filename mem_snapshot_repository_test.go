@@ -22,8 +22,8 @@ func ExampleMemSnapshotRepository() {
 	}
 
 	{
-		snapshot := snapshots.Snapshots()[0]
 		root := &testRoot{0}
+		snapshot := snapshots.Snapshots()[0]
 		_ = ApplySnapshot(root, snapshot)
 		database := NewDefaultDatabase(root, snapshot.Id(), nil)
 
