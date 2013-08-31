@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-// It implements sort.Interface, the greater TransactionIds are first.
+// It implements sort.Interface.
 type snapshotIdSlice []SnapshotId
 
 func (s snapshotIdSlice) Len() int {
@@ -19,7 +19,7 @@ func (s snapshotIdSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// The greater TransactionIds are first.
+// Sort SnapshotIds in descending order of their Id().
 func SortSnapshots(snapshots []SnapshotId) {
 	sort.Sort(snapshotIdSlice(snapshots))
 }
