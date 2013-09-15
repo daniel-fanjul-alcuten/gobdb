@@ -54,7 +54,11 @@ func TestApplyBursts(t *testing.T) {
 	}
 
 	root := &testRoot{0}
-	id, err := ApplyBursts(root, 0, repository.Bursts())
+	bursts, err := repository.Bursts()
+	if err != nil {
+		t.Error(err)
+	}
+	id, err := ApplyBursts(root, 0, bursts)
 	if id != 4 {
 		t.Error(id)
 	}

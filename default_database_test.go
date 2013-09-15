@@ -150,10 +150,14 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 		t.Error(err)
 	}
 
-	bursts := repository.Bursts()
+	bursts, err := repository.Bursts()
 	if len(bursts) != 1 {
-		t.Fatal(bursts)
+		t.Fatal(len(bursts))
 	}
+	if err != nil {
+		t.Error(err)
+	}
+
 	burst, err := repository.ReadBurst(bursts[0])
 	if err != nil {
 		t.Error(err)

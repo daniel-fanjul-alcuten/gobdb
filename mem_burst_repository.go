@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-// A container of Bursts that keeps the data in memory.
+// A BurstRepository and WriteBurstRepository that keeps the data in memory.
 // Thread-safe, but BurstReaders and BurstWriters are not.
 type MemBurstRepository struct {
 	mutex  sync.Mutex
@@ -22,7 +22,7 @@ func NewMemBurstRepository() *MemBurstRepository {
 }
 
 // Implements BurstRepository.Bursts().
-func (r *MemBurstRepository) Bursts() []BurstId {
+func (r *MemBurstRepository) Bursts() ([]BurstId, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	ids := make([]BurstId, 0, r.count)
@@ -33,7 +33,7 @@ func (r *MemBurstRepository) Bursts() []BurstId {
 			}
 		}
 	}
-	return ids
+	return ids, nil
 }
 
 // Implements BurstRepository.ReadBurst().

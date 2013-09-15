@@ -18,7 +18,7 @@ type BurstReader interface {
 // A container that can read Bursts.
 type BurstRepository interface {
 	// List of all Bursts.
-	Bursts() []BurstId
+	Bursts() ([]BurstId, error)
 	// Get a BurstReader of a Burst.
 	ReadBurst(BurstId) (BurstReader, error)
 }

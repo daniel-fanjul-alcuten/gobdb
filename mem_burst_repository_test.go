@@ -27,7 +27,8 @@ func ExampleMemBurstRepository() {
 
 	{
 		root := &testRoot{0}
-		id, _ := ApplyBursts(root, 0, bursts.Bursts())
+		burstIds, _ := bursts.Bursts()
+		id, _ := ApplyBursts(root, 0, burstIds)
 		database := NewDefaultDatabase(root, id, nil)
 
 		// the testReader reads the counter
@@ -56,9 +57,12 @@ func TestMemBurstRepositoryEmpty(t *testing.T) {
 		t.Fatal(repository)
 	}
 
-	bursts := repository.Bursts()
+	bursts, err := repository.Bursts()
 	if len(bursts) != 0 {
-		t.Error(bursts)
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -109,7 +113,11 @@ func TestMemBurstRepositoryBursts(t *testing.T) {
 	}
 
 	var id BurstId
-	if bursts := repository.Bursts(); len(bursts) != 1 || bursts[0].First() != 1 || bursts[0].Last() != 2 {
+	bursts, err := repository.Bursts()
+	if err != nil {
+		t.Error(err)
+	}
+	if len(bursts) != 1 || bursts[0].First() != 1 || bursts[0].Last() != 2 {
 		t.Error(bursts)
 	} else {
 		id = bursts[0]

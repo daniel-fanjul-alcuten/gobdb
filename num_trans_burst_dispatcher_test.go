@@ -25,48 +25,67 @@ func TestNumTransactionsBurstDispatcherWrite(t *testing.T) {
 	if err := dispatcher.Write(Transaction{1, &testWriter{11}}); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 0 {
-		t.Error(repository.Bursts())
+	bursts, err := repository.Bursts()
+	if len(bursts) != 0 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := dispatcher.Rotate(); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 1 {
-		t.Error(repository.Bursts())
+	bursts, err = repository.Bursts()
+	if len(bursts) != 1 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := dispatcher.Write(Transaction{2, &testWriter{12}}); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 1 {
-		t.Error(repository.Bursts())
+	bursts, err = repository.Bursts()
+	if len(bursts) != 1 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := dispatcher.Write(Transaction{3, &testWriter{13}}); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 2 {
-		t.Error(repository.Bursts())
+	bursts, err = repository.Bursts()
+	if len(bursts) != 2 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := dispatcher.Write(Transaction{4, &testWriter{14}}); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 2 {
-		t.Error(repository.Bursts())
+	bursts, err = repository.Bursts()
+	if len(bursts) != 2 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 
 	if err := dispatcher.Close(); err != nil {
 		t.Error(err)
 	}
-	if len(repository.Bursts()) != 3 {
-		t.Error(repository.Bursts())
-	}
-
-	bursts := repository.Bursts()
+	bursts, err = repository.Bursts()
 	if len(bursts) != 3 {
-		t.Fatal(bursts)
+		t.Fatal(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 	SortBursts(bursts)
 
