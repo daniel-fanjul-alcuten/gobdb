@@ -18,7 +18,7 @@ func ApplySnapshot(root Root, snapshotId SnapshotId) error {
 		writer, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
-				err = nil
+				return reader.Close()
 			}
 			return err
 		}
