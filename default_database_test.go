@@ -159,7 +159,7 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 		t.Error(err)
 	}
 
-	burst, err := repository.ReadBurst(bursts[0])
+	burst, err := bursts[0].Read()
 	if err != nil {
 		t.Error(err)
 	}
@@ -246,7 +246,7 @@ func TestDefaultDatabaseTakeSnapshot(t *testing.T) {
 		}
 	}
 
-	snapshot, err := repository.ReadSnapshot(id)
+	snapshot, err := id.Read()
 	if err != nil {
 		t.Error(err)
 	}

@@ -71,7 +71,7 @@ func ApplyBursts(root Root, transactionId TransactionId, burstIds []BurstId) (la
 			open = id.First() <= next && !skip
 			if open {
 				var reader applyBurstsReader
-				if reader.BurstReader, err = id.Repository().ReadBurst(id); err != nil {
+				if reader.BurstReader, err = id.Read(); err != nil {
 					return
 				}
 				readers = append(readers, reader)

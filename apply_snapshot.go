@@ -8,7 +8,7 @@ import (
 // It applies the Writers of a Snapshot to a Root.
 func ApplySnapshot(root Root, snapshotId SnapshotId) error {
 
-	reader, err := snapshotId.Repository().ReadSnapshot(snapshotId)
+	reader, err := snapshotId.Read()
 	if err != nil {
 		return err
 	}

@@ -3,15 +3,23 @@ package gobdb
 // A Burst is a gob stream of Transactions.
 // It is required to contain them in order, but not to be consecutive.
 type BurstId interface {
+	// The first transaction in the Burst.
 	First() TransactionId
+	// The last transaction in the Burst.
 	Last() TransactionId
+	// The Repository it comes from.
 	Repository() BurstRepository
+	// Get a BurstReader of a Burst.
+	Read() (BurstReader, error)
 }
 
 // It reads the Transactions of a Burst.
 type BurstReader interface {
+	// The id of the Burst.
 	Id() BurstId
+	// It reads a Transaction until io.EOF.
 	Read() (Transaction, error)
+	// It closes the stream.
 	Close() error
 }
 
@@ -19,8 +27,6 @@ type BurstReader interface {
 type BurstRepository interface {
 	// List of all Bursts.
 	Bursts() ([]BurstId, error)
-	// Get a BurstReader of a Burst.
-	ReadBurst(BurstId) (BurstReader, error)
 }
 
 // It writes the Transactions of a Burst.

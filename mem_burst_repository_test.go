@@ -151,7 +151,7 @@ func TestMemBurstRepositoryBursts(t *testing.T) {
 		}
 	}
 
-	rburst, err := repository.ReadBurst(id)
+	rburst, err := id.Read()
 	if err != nil {
 		t.Error(err)
 	}

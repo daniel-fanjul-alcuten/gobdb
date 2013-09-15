@@ -78,7 +78,7 @@ func TestDefaultBurstDispatcherWrite(t *testing.T) {
 	}
 	SortBursts(bursts)
 
-	burst, err := repository.ReadBurst(bursts[0])
+	burst, err := bursts[0].Read()
 	if err != nil {
 		t.Error(err)
 	}
@@ -118,7 +118,7 @@ func TestDefaultBurstDispatcherWrite(t *testing.T) {
 		t.Error(err)
 	}
 
-	burst, err = repository.ReadBurst(bursts[1])
+	burst, err = bursts[1].Read()
 	if err != nil {
 		t.Error(err)
 	}

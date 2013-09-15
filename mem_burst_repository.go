@@ -36,28 +36,6 @@ func (r *MemBurstRepository) Bursts() ([]BurstId, error) {
 	return ids, nil
 }
 
-// Implements BurstRepository.ReadBurst().
-func (r *MemBurstRepository) ReadBurst(id BurstId) (BurstReader, error) {
-	mid, ok := id.(*memBurstId)
-	if !ok {
-		return nil, errors.New("gobdb: wrong type of BurstId on MemBurstRepository")
-	}
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-	m2, ok := r.bursts[mid.first]
-	if ok {
-		m3, ok := m2[mid.last]
-		if ok {
-			data, ok := m3[mid]
-			if ok {
-				decoder := gob.NewDecoder(bytes.NewReader(data))
-				return &memBurstReader{decoder, mid}, nil
-			}
-		}
-	}
-	return nil, errors.New("gobdb: BurstId not found on MemBurstRepository")
-}
-
 // Implements WriteBurstRepository.WriteBurst().
 func (r *MemBurstRepository) WriteBurst() (BurstWriter, error) {
 	buffer := &bytes.Buffer{}
@@ -80,6 +58,23 @@ func (id *memBurstId) Last() TransactionId {
 
 func (id *memBurstId) Repository() BurstRepository {
 	return id.repository
+}
+
+func (id *memBurstId) Read() (BurstReader, error) {
+	id.repository.mutex.Lock()
+	defer id.repository.mutex.Unlock()
+	m2, ok := id.repository.bursts[id.first]
+	if ok {
+		m3, ok := m2[id.last]
+		if ok {
+			data, ok := m3[id]
+			if ok {
+				decoder := gob.NewDecoder(bytes.NewReader(data))
+				return &memBurstReader{decoder, id}, nil
+			}
+		}
+	}
+	return nil, errors.New("gobdb: BurstId not found on MemBurstRepository")
 }
 
 type memBurstReader struct {

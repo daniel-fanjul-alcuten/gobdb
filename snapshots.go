@@ -4,14 +4,21 @@ package gobdb
 // must yield the same result than to apply the Writers of all Transactions
 // starting from the first one until the given one.
 type SnapshotId interface {
+	// The last transaction.
 	Id() TransactionId
+	// The Repository it comes from.
 	Repository() SnapshotRepository
+	// Get a SnapshotReader of a Snapshot.
+	Read() (SnapshotReader, error)
 }
 
 // It reads the Writers of a Snapshot.
 type SnapshotReader interface {
+	// The id of the Snapshot.
 	Id() SnapshotId
+	// It reads a Writer until io.EOF.
 	Read() (Writer, error)
+	// It closes the stream.
 	Close() error
 }
 
@@ -19,8 +26,6 @@ type SnapshotReader interface {
 type SnapshotRepository interface {
 	// List of all Snapshots.
 	Snapshots() ([]SnapshotId, error)
-	// Get a SnapshotReader of a Snapshot.
-	ReadSnapshot(SnapshotId) (SnapshotReader, error)
 }
 
 // It writes the Writers of a Snapshot.

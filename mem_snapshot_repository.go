@@ -34,25 +34,6 @@ func (r *MemSnapshotRepository) Snapshots() ([]SnapshotId, error) {
 	return ids, nil
 }
 
-// Implements SnapshotRepository.ReadSnapshot().
-func (r *MemSnapshotRepository) ReadSnapshot(id SnapshotId) (SnapshotReader, error) {
-	mid, ok := id.(*memSnapshotId)
-	if !ok {
-		return nil, errors.New("gobdb: wrong type of SnapshotId on MemSnapshotRepository")
-	}
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-	m2, ok := r.snaps[mid.id]
-	if ok {
-		data, ok := m2[mid]
-		if ok {
-			decoder := gob.NewDecoder(bytes.NewReader(data))
-			return &memSnapshotReader{decoder, mid}, nil
-		}
-	}
-	return nil, errors.New("gobdb: SnapshotId not found on MemSnapshotRepository")
-}
-
 // Implements WriteSnapshotRepository.WriteSnapshot().
 func (r *MemSnapshotRepository) WriteSnapshot(id TransactionId) (SnapshotWriter, error) {
 	buffer := &bytes.Buffer{}
@@ -71,6 +52,20 @@ func (id *memSnapshotId) Id() TransactionId {
 
 func (id *memSnapshotId) Repository() SnapshotRepository {
 	return id.repository
+}
+
+func (id *memSnapshotId) Read() (SnapshotReader, error) {
+	id.repository.mutex.Lock()
+	defer id.repository.mutex.Unlock()
+	m2, ok := id.repository.snaps[id.id]
+	if ok {
+		data, ok := m2[id]
+		if ok {
+			decoder := gob.NewDecoder(bytes.NewReader(data))
+			return &memSnapshotReader{decoder, id}, nil
+		}
+	}
+	return nil, errors.New("gobdb: SnapshotId not found on MemSnapshotRepository")
 }
 
 type memSnapshotReader struct {

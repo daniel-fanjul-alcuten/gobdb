@@ -104,7 +104,7 @@ func TestMemSnapshotRepositorySnapshots(t *testing.T) {
 		}
 	}
 
-	rsnapshot, err := repository.ReadSnapshot(id)
+	rsnapshot, err := id.Read()
 	if rsnapshot == nil {
 		t.Fatal(rsnapshot)
 	}
