@@ -16,14 +16,14 @@ func ExampleDefaultDatabase() {
 		database := NewDefaultDatabase(&testRoot{0}, 0, dispatcher)
 
 		// the testWriter increments the counter
-		result1, _ := database.Write(&testWriter{3})
+		result1, _, _ := database.Write(&testWriter{3})
 		fmt.Println("first write:", result1)
 
 		// testSnapshooter is a Snapshooter for the type testRoot
 		_ = database.TakeSnapshot(testSnapshooter, snapshots)
 
 		// the testWriter decrements the counter
-		result2, _ := database.Write(&testWriter{-1})
+		result2, _, _ := database.Write(&testWriter{-1})
 		fmt.Println("second write:", result2)
 
 		_ = dispatcher.Close()
@@ -82,24 +82,30 @@ func TestDefaultDatabaseWrite(t *testing.T) {
 		t.Fatal(database)
 	}
 
-	result, err := database.Write(&testWriter{3})
+	result, err1, err2 := database.Write(&testWriter{3})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 3 {
 		t.Error(value)
 	}
-	if err != nil {
-		t.Error(err)
-	}
 
-	result, err = database.Write(&testWriter{-1})
+	result, err1, err2 = database.Write(&testWriter{-1})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 2 {
 		t.Error(value)
-	}
-	if err != nil {
-		t.Error(err)
 	}
 
 	result = database.Read(&testReader{})
@@ -120,24 +126,30 @@ func TestDefaultDatabaseWithBurstDispather(t *testing.T) {
 		t.Fatal(database)
 	}
 
-	result, err := database.Write(&testWriter{11})
+	result, err1, err2 := database.Write(&testWriter{11})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 11 {
 		t.Error(value)
 	}
-	if err != nil {
-		t.Error(err)
-	}
 
-	result, err = database.Write(&testWriter{12})
+	result, err1, err2 = database.Write(&testWriter{12})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 23 {
 		t.Error(value)
-	}
-	if err != nil {
-		t.Error(err)
 	}
 
 	result = database.Read(&testReader{})
@@ -207,24 +219,30 @@ func TestDefaultDatabaseTakeSnapshot(t *testing.T) {
 		t.Fatal(database)
 	}
 
-	result, err := database.Write(&testWriter{11})
+	result, err1, err2 := database.Write(&testWriter{11})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 11 {
 		t.Error(value)
 	}
-	if err != nil {
-		t.Error(err)
-	}
 
-	result, err = database.Write(&testWriter{12})
+	result, err1, err2 = database.Write(&testWriter{12})
+	if err1 != nil {
+		t.Error(err1)
+	}
+	if err2 != nil {
+		t.Error(err2)
+	}
 	if value, ok := result.(int); !ok {
 		t.Error(result)
 	} else if value != 23 {
 		t.Error(value)
-	}
-	if err != nil {
-		t.Error(err)
 	}
 
 	repository := NewMemSnapshotRepository()

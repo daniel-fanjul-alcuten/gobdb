@@ -19,14 +19,14 @@ func (db *DefaultDatabase) Read(reader Reader) interface{} {
 }
 
 // Implements WriteDatabase.Write().
-func (db *DefaultDatabase) Write(writer Writer) (value interface{}, err error) {
-	value, err = writer.Write(db.root)
-	if err != nil {
+func (db *DefaultDatabase) Write(writer Writer) (value interface{}, err1 error, err2 error) {
+	value, err1 = writer.Write(db.root)
+	if err1 != nil {
 		return
 	}
 	db.lastId++
 	if db.dispatcher != nil {
-		err = db.dispatcher.Write(Transaction{db.lastId, writer})
+		err2 = db.dispatcher.Write(Transaction{db.lastId, writer})
 	}
 	return
 }

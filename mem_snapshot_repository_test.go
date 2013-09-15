@@ -14,7 +14,7 @@ func ExampleMemSnapshotRepository() {
 		database := NewDefaultDatabase(&testRoot{0}, 0, nil)
 
 		// the testWriter increments the counter
-		result, _ := database.Write(&testWriter{3})
+		result, _, _ := database.Write(&testWriter{3})
 		fmt.Println("before snapshot:", result)
 
 		// testSnapshooter is a Snapshooter for the type testRoot

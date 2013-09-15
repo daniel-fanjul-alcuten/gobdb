@@ -15,9 +15,9 @@ func ExampleMemBurstRepository() {
 		database := NewDefaultDatabase(&testRoot{0}, 0, dispatcher)
 
 		// the testWriter increments the counter
-		_, _ = database.Write(&testWriter{3})
+		_, _, _ = database.Write(&testWriter{3})
 		// the testWriter decrements the counter
-		_, _ = database.Write(&testWriter{-1})
+		_, _, _ = database.Write(&testWriter{-1})
 		// the testReader reads the counter
 		result := database.Read(&testReader{})
 		fmt.Println("before burst:", result)

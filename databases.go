@@ -25,9 +25,11 @@ type BurstDispatcher interface {
 // a BurstDispatcher.
 type WriteDatabase interface {
 	Database
-	// It applies the Writer to the Root object and returns its result. It writes
-	// the Writer to the BurstDispatcher.
-	Write(Writer) (interface{}, error)
+	// It applies the Writer to the Root object and returns its result and its
+	// error as the first one.
+	// If succcessful, it writes the Writer to the BurstDispatcher and returns
+	// its error as the second one.
+	Write(Writer) (interface{}, error, error)
 }
 
 // The user defined function to take a Snapshot of a Root.
