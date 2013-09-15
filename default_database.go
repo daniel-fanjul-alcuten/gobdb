@@ -1,6 +1,6 @@
 package gobdb
 
-// A Database, WriteDatabase and SnapshotDatabase.
+// A Database, WriteDatabase and SnapshotDatabase. No thread-safe.
 type DefaultDatabase struct {
 	root       Root
 	lastId     TransactionId

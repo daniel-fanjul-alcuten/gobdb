@@ -8,6 +8,7 @@ import (
 )
 
 // A container of Bursts that keeps the data in memory.
+// Thread-safe, but BurstReaders and BurstWriters are not.
 type MemBurstRepository struct {
 	mutex  sync.Mutex
 	count  int

@@ -1,6 +1,7 @@
 package gobdb
 
-// It writes to only one Burst. No rotation.
+// It writes to only one Burst. There is no automatic rotation.
+// No thread-safe.
 type DefaultBurstDispatcher struct {
 	burst      BurstWriter
 	repository WriteBurstRepository
@@ -22,14 +23,24 @@ func (bd *DefaultBurstDispatcher) Write(transaction Transaction) (err error) {
 	return bd.burst.Write(transaction)
 }
 
-// Implements BurstDispatcher.Close().
-func (bd *DefaultBurstDispatcher) Close() (err error) {
+// Implements BurstDispatcher.Rotate().
+func (bd *DefaultBurstDispatcher) Rotate() (err error) {
 	if bd.burst == nil {
 		return
 	}
 	if err = bd.burst.Close(); err != nil {
 		return
 	}
+	bd.burst = nil
+	return
+}
+
+// Implements BurstDispatcher.Close().
+func (bd *DefaultBurstDispatcher) Close() (err error) {
+	if bd.burst == nil {
+		return
+	}
+	err = bd.burst.Close()
 	bd.burst = nil
 	return
 }

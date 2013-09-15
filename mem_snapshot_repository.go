@@ -8,6 +8,7 @@ import (
 )
 
 // A container of Snapshots that keeps the data in memory.
+// Thread-safe, but SnapshotReaders and SnapshotWriters are not.
 type MemSnapshotRepository struct {
 	mutex sync.Mutex
 	count int

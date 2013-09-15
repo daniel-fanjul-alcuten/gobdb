@@ -8,15 +8,15 @@ type Database interface {
 	Read(Reader) interface{}
 }
 
-// It dispatches the writes of Writers to one or more Bursts of a
-// WriteBurstRepository. It implements the rotation of Bursts.
+// It dispatches the writes of the Transactions to one or more Bursts.
+// Bursts can be created and closed when needed,
+// so rotation of files can be implemented.
 type BurstDispatcher interface {
-	// It creates a Burst or reuses a previous one and writes the Transaction
-	// to it.
-	// It may close and create new Bursts when some threshold is reached based
-	// on criteria like time, number of bytes, number of Transactions and so on.
+	// It writes the Transaction in a previous or new Burst.
 	Write(Transaction) error
-	// Close the last BurstWriter if needed.
+	// It forces the rotation.
+	Rotate() error
+	// It releases resources.
 	Close() error
 }
 
