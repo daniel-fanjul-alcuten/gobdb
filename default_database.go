@@ -40,12 +40,18 @@ func (db *DefaultDatabase) TakeSnapshot(snapshooter Snapshooter, repository Writ
 	}
 	defer writer.Close()
 
-	return snapshooter(db.root, func(writers ...Writer) error {
+	write := func(writers ...Writer) error {
 		for _, w := range writers {
 			if err := writer.Write(w); err != nil {
 				return err
 			}
 		}
 		return nil
-	})
+	}
+
+	if err := snapshooter(db.root, write); err != nil {
+		return err
+	}
+
+	return writer.Close()
 }
