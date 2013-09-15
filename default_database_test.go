@@ -29,7 +29,8 @@ func ExampleDefaultDatabase() {
 		_ = dispatcher.Close()
 	}
 
-	snapshotId := snapshots.Snapshots()[0]
+	snapshotIds, _ := snapshots.Snapshots()
+	snapshotId := snapshotIds[0]
 	{
 		root := &testRoot{0}
 		_ = ApplySnapshot(root, snapshotId)
@@ -232,7 +233,11 @@ func TestDefaultDatabaseTakeSnapshot(t *testing.T) {
 	}
 
 	var id SnapshotId
-	if snapshots := repository.Snapshots(); len(snapshots) != 1 {
+	snapshots, err := repository.Snapshots()
+	if err != nil {
+		t.Error(err)
+	}
+	if len(snapshots) != 1 {
 		t.Error(snapshots)
 	} else {
 		id = snapshots[0]

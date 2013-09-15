@@ -29,7 +29,14 @@ func TestApplySnapshot(t *testing.T) {
 	}
 
 	root := &testRoot{}
-	snapshotId := repository.Snapshots()[0]
+	snapshots, err := repository.Snapshots()
+	if len(snapshots) != 1 {
+		t.Fatal(len(snapshots))
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	snapshotId := snapshots[0]
 	if err := ApplySnapshot(root, snapshotId); err != nil {
 		t.Error(err)
 	}

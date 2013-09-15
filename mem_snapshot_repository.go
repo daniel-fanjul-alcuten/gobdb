@@ -22,7 +22,7 @@ func NewMemSnapshotRepository() *MemSnapshotRepository {
 }
 
 // Implements SnapshotRepository.Snapshots().
-func (r *MemSnapshotRepository) Snapshots() []SnapshotId {
+func (r *MemSnapshotRepository) Snapshots() ([]SnapshotId, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	ids := make([]SnapshotId, 0, r.count)
@@ -31,7 +31,7 @@ func (r *MemSnapshotRepository) Snapshots() []SnapshotId {
 			ids = append(ids, id)
 		}
 	}
-	return ids
+	return ids, nil
 }
 
 // Implements SnapshotRepository.ReadSnapshot().

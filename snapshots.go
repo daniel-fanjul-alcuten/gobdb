@@ -18,7 +18,7 @@ type SnapshotReader interface {
 // A container that can read Snapshots.
 type SnapshotRepository interface {
 	// List of all Snapshots.
-	Snapshots() []SnapshotId
+	Snapshots() ([]SnapshotId, error)
 	// Get a SnapshotReader of a Snapshot.
 	ReadSnapshot(SnapshotId) (SnapshotReader, error)
 }

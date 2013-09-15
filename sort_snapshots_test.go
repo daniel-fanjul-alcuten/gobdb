@@ -45,7 +45,13 @@ func TestSortSnapshot(t *testing.T) {
 		t.Error(err)
 	}
 
-	snapshots := repository.Snapshots()
+	snapshots, err := repository.Snapshots()
+	if len(snapshots) != 2 {
+		t.Fatal(len(snapshots))
+	}
+	if err != nil {
+		t.Error(err)
+	}
 	SortSnapshots(snapshots)
 	if snapshots[0].Id() != 2 {
 		t.Error(snapshots[0].Id())

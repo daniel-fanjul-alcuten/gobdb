@@ -23,7 +23,8 @@ func ExampleMemSnapshotRepository() {
 
 	{
 		root := &testRoot{0}
-		snapshot := snapshots.Snapshots()[0]
+		snapshotIds, _ := snapshots.Snapshots()
+		snapshot := snapshotIds[0]
 		_ = ApplySnapshot(root, snapshot)
 		database := NewDefaultDatabase(root, snapshot.Id(), nil)
 
@@ -53,9 +54,12 @@ func TestMemSnapshotRepositoryEmpty(t *testing.T) {
 		t.Fatal(repository)
 	}
 
-	snapshots := repository.Snapshots()
+	snapshots, err := repository.Snapshots()
 	if len(snapshots) != 0 {
-		t.Error(snapshots)
+		t.Fatal(len(snapshots))
+	}
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -87,7 +91,11 @@ func TestMemSnapshotRepositorySnapshots(t *testing.T) {
 	}
 
 	var id SnapshotId
-	if snapshots := repository.Snapshots(); len(snapshots) != 1 || snapshots[0].Id() != 1 {
+	snapshots, err := repository.Snapshots()
+	if err != nil {
+		t.Error(err)
+	}
+	if len(snapshots) != 1 || snapshots[0].Id() != 1 {
 		t.Error(snapshots)
 	} else {
 		id = snapshots[0]
