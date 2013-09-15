@@ -134,11 +134,11 @@ func (bw *memBurstWriter) Write(transaction Transaction) error {
 }
 
 func (bw *memBurstWriter) Close() error {
-	if bw.last == 0 {
-		return errors.New("gobdb: close() on a BurstWriter without Transactions")
-	}
 	if bw.encoder == nil {
 		return errors.New("gobdb: close() on closed BurstWriter")
+	}
+	if bw.last == 0 {
+		return nil
 	}
 	bw.repository.mutex.Lock()
 	defer bw.repository.mutex.Unlock()

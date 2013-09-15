@@ -64,6 +64,31 @@ func TestMemBurstRepositoryEmpty(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	wburst, err := repository.WriteBurst()
+	if wburst == nil {
+		t.Fatal(wburst)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	if wburst.First() != 0 {
+		t.Error(wburst.First())
+	}
+	if wburst.Last() != 0 {
+		t.Error(wburst.Last())
+	}
+	if err := wburst.Close(); err != nil {
+		t.Error(err)
+	}
+
+	bursts, err = repository.Bursts()
+	if len(bursts) != 0 {
+		t.Error(len(bursts))
+	}
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestMemBurstRepositoryBursts(t *testing.T) {
@@ -127,11 +152,11 @@ func TestMemBurstRepositoryBursts(t *testing.T) {
 	}
 
 	rburst, err := repository.ReadBurst(id)
-	if rburst == nil {
-		t.Fatal(rburst)
-	}
 	if err != nil {
 		t.Error(err)
+	}
+	if rburst == nil {
+		t.Fatal(rburst)
 	}
 	if rburst.Id() != id {
 		t.Error(rburst.Id)
