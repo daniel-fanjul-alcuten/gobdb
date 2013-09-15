@@ -58,15 +58,12 @@ func TestApplyBursts(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	id, err := ApplyBursts(root, 0, bursts)
+	var id TransactionId
+	if err := ApplyBursts(root, 0, &id, bursts); err != nil {
+		t.Error(err)
+	}
 	if id != 4 {
 		t.Error(id)
-	}
-	if err != nil {
-		t.Error(err)
-	}
-	if err != nil {
-		t.Error(err)
 	}
 	if root.counter != 50 {
 		t.Error(root.counter)

@@ -33,7 +33,8 @@ func ExampleDirBurstRepository() {
 	{
 		root := &testRoot{0}
 		burstIds, _ := bursts.Bursts()
-		id, _ := ApplyBursts(root, 0, burstIds)
+		var id TransactionId
+		_ = ApplyBursts(root, 0, &id, burstIds)
 		database := NewDefaultDatabase(root, id, nil)
 
 		// the testReader reads the counter

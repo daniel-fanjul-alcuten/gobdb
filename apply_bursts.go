@@ -11,14 +11,14 @@ type applyBurstsReader struct {
 
 // Applies bursts in order to a Root object. It receives and returns the last
 // TransactionId applied to the Root. It sorts the []BurstId with SortBursts().
-func ApplyBursts(root Root, transactionId TransactionId, burstIds []BurstId) (last TransactionId, err error) {
+func ApplyBursts(root Root, lastId TransactionId, nextLastId *TransactionId, burstIds []BurstId) (err error) {
 
-	last = transactionId
-	next := last + 1
+	last, next := lastId, lastId+1
 	SortBursts(burstIds)
 
 	readers := []applyBurstsReader{}
 	defer func() {
+		*nextLastId = last
 		for _, r := range readers {
 			r.Close()
 		}
